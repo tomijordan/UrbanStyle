@@ -805,3 +805,9 @@ footer {
    object-fit: cover;
    border-radius: 0.25rem;
 }
+.img-resize {
+   width: 400px;
+   height: 400px;
+   object-fit: cover; /* Ensures the image covers the dimensions without distortion */
+   border-radius: 0.25rem;
+}
