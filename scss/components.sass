@@ -1,0 +1,30 @@
+nav {
+  background-color: $navbar-bg;
+  padding: 20px;
+  text-align: center;
+
+  .index {
+    list-style-type: none;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 10px;
+
+    li {
+      display: inline;
+    }
+
+    a {
+      color: $navbar-link-color;
+      text-decoration: none;
+      padding: 10px 20px;
+      background-color: $navbar-link-bg;
+      border-radius: 5px;
+
+      &:hover {
+        background-color: $navbar-link-hover-bg;
+      }
+    }
+  }
+}
