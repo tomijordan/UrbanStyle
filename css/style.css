@@ -782,3 +782,26 @@ footer {
    display: inline;
    justify-content: left;
 }
+@media (max-width: 768px) {
+   .navbar-toggler {
+       border: none;
+       outline: none;
+   }
+   .index {
+       display: flex;
+       flex-direction: column;
+       padding-left: 0;
+   }
+   .index li {
+       margin-bottom: 0.5rem;
+   }
+   .index a {
+       font-size: 1.1rem;
+   }
+}
+.img-resize {
+   width: 400px;
+   height: 400px;
+   object-fit: cover;
+   border-radius: 0.25rem;
+}
