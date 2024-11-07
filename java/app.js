@@ -1,105 +1,123 @@
-// Clase Producto
 class Producto {
-    constructor(nombre, stock, precio) {
+    constructor(nombre, stock, precio, imagen) {
         this.nombre = nombre;
         this.stock = stock;
         this.precio = precio;
-    }
-
-    // Método para revisar disponibilidad
-    revisarDisponibilidad() {
-        return this.stock > 0 
-            ? `${this.nombre} está disponible, tenemos ${this.stock} en stock.`
-            : `${this.nombre} está agotado.`;
-    }
-
-    // Método para disminuir el stock
-    disminuirStock() {
-        if (this.stock > 0) {
-            this.stock--;
-        }
+        this.imagen = imagen;
     }
 }
 
-// Función para mostrar los productos disponibles
-function mostrarInventario(inventario) {
-    return inventario
-        .map(p => `${p.nombre} (Stock: ${p.stock}) - $${p.precio}`)
-        .join('\n');
-}
-
-// Función para buscar un producto por nombre
-function buscarProducto(nombreProducto, inventario) {
-    return inventario.find(producto => producto.nombre.toLowerCase() === nombreProducto.toLowerCase());
-}
-
-// Función de orden superior para aplicar descuentos (ejemplo)
-function aplicarDescuento(inventario, porcentaje) {
-    return inventario.map(producto => ({
-        ...producto,
-        precio: producto.precio * (1 - porcentaje / 100)
-    }));
-}
-
-// Crear el inventario usando la clase Producto
 const inventarioTienda = [
-    new Producto('Remera Negra', 2, 300),
-    new Producto('Pantalón Cargo', 4, 200),
-    new Producto('Zapatillas Blancas', 3, 500),
-    new Producto('Campera Verde', 1, 400)
+    new Producto('Remera HitHot gris', 2, 300, '../assets/remera 2.webp'),
+    new Producto('Remera Vans blanca', 5, 350, '../assets/remera vans (3).webp'),
+    new Producto('Remera Topper gris', 3, 400, '../assets/remera topper (4).jpg'),
+    new Producto('Pantalón cargo azul', 4, 500, '../assets/pantalon 2.jpg'),
+    new Producto('Pantalón negro', 6, 550, '../assets/pantalon negro 3.webp'),
+    new Producto('Pantalón gris', 2, 450, '../assets/pantalon gris 4.jpg'),
+    new Producto('Buzo oversize negro', 3, 600, '../assets/buzo negro 1.jpeg'),
+    new Producto('Buzo oversize blanco', 2, 700, '../assets/buzo blanco 2.jpg'),
+    new Producto('Buzo oversize marrón', 4, 750, '../assets/buzo marron 3.webp')
 ];
 
-// Imprimir productos disponibles con su stock
-console.log('Inventario de la tienda:');
-inventarioTienda.forEach(producto => console.log(producto.revisarDisponibilidad()));
+let carrito = JSON.parse(localStorage.getItem('carrito')) || [];
+let totalCompra = carrito.reduce((total, prod) => total + prod.precio, 0);
+const productContainer = document.getElementById('product-list');
+const carritoLista = document.getElementById('carrito-lista');
+const totalCompraDisplay = document.getElementById('total-compra');
+const finalizarCompraBtn = document.getElementById('finalizar-compra');
 
-// Variable para almacenar el costo total de la compra
-let totalCompra = 0;
-let carrito = [];
-
-// Ciclo principal de selección de productos
-let continuarCompra = 'si';
-
-do {
-    // Mostrar productos disponibles al usuario
-    alert('Productos disponibles:\n' + mostrarInventario(inventarioTienda));
-
-    // Pedir al usuario que ingrese el nombre del producto que desea comprar
-    let productoIngresado = prompt('¿Qué producto deseas comprar?').trim();
-
-    // Buscar el producto
-    let productoEncontrado = buscarProducto(productoIngresado, inventarioTienda);
-
-    if (productoEncontrado) {
-        if (productoEncontrado.stock > 0) {
-            alert(`Has agregado ${productoEncontrado.nombre} al carrito.`);
-            totalCompra += productoEncontrado.precio; // Actualizamos el total
-            productoEncontrado.disminuirStock(); // Reducimos el stock
-            carrito.push(productoEncontrado); // Agregar al carrito
-        } else {
-            alert(`${productoEncontrado.nombre} ya no está disponible.`);
-        }
-    } else {
-        alert('Producto no válido o no encontrado.');
-    }
-
-    // Preguntar al usuario si quiere agregar otro producto y validar la respuesta
-    do {
-        continuarCompra = prompt('¿Quieres agregar otro producto? (si/no)').toLowerCase().trim();
-    } while (continuarCompra !== 'si' && continuarCompra !== 'no');
-
-} while (continuarCompra === 'si');
-
-// Aplicar un descuento del 10% a todos los productos seleccionados si el total es mayor a $1000
-if (totalCompra > 1000) {
-    alert('Aplicando descuento del 10% por superar los $1000 en compras.');
-    carrito = aplicarDescuento(carrito, 10);
-    totalCompra = carrito.reduce((total, producto) => total + producto.precio, 0);
+function actualizarCarrito() {
+    carritoLista.innerHTML = '';
+    carrito.forEach((producto, index) => {
+        const li = document.createElement('li');
+        li.className = 'list-group-item d-flex justify-content-between align-items-center';
+        li.textContent = `${producto.nombre} - $${producto.precio}`;
+        const removeBtn = document.createElement('button');
+        removeBtn.className = 'btn btn-danger btn-sm';
+        removeBtn.textContent = 'Eliminar';
+        removeBtn.addEventListener('click', () => {
+            carrito.splice(index, 1);
+            totalCompra -= producto.precio;
+            localStorage.setItem('carrito', JSON.stringify(carrito));
+            actualizarCarrito();
+        });
+        li.appendChild(removeBtn);
+        carritoLista.appendChild(li);
+    });
+    totalCompraDisplay.textContent = `Total: $${totalCompra}`;
 }
 
-// Mostrar el total de la compra
-console.log(`El total de tu compra es: $${totalCompra}`);
+function agregarAlCarrito(producto) {
+    if (producto.stock > 0) {
+        carrito.push(producto);
+        totalCompra += producto.precio;
+        producto.stock--;
+        localStorage.setItem('carrito', JSON.stringify(carrito));
+        actualizarCarrito();
+    } else {
+        alert(`${producto.nombre} está agotado`);
+    }
+}
 
-// Mostrar los productos comprados
-console.log('Productos en el carrito:');
-carrito.forEach(producto => console.log(`${producto.nombre} - Precio final: $${producto.precio}`));
+function finalizarCompra() {
+    if (carrito.length > 0) {
+        carrito = [];
+        totalCompra = 0;
+        localStorage.removeItem('carrito');
+        actualizarCarrito();
+        alert('¡Compra finalizada con éxito! Gracias por tu compra.');
+    } else {
+        alert('El carrito está vacío.');
+    }
+}
+
+finalizarCompraBtn.addEventListener('click', finalizarCompra);
+
+inventarioTienda.forEach(producto => {
+    const col = document.createElement('div');
+    col.className = 'col-md-4';
+
+    const card = document.createElement('div');
+    card.className = 'card';
+
+    const img = document.createElement('img');
+    img.src = producto.imagen;
+    img.className = 'card-img-top img-resize';
+    img.alt = producto.nombre;
+
+    const cardBody = document.createElement('div');
+    cardBody.className = 'card-body';
+
+    const title = document.createElement('h5');
+    title.className = 'card-title';
+    title.textContent = producto.nombre;
+
+    const price = document.createElement('p');
+    price.className = 'card-text';
+    price.textContent = `$${producto.precio}`;
+
+    const select = document.createElement('select');
+    select.className = 'form-select my-2';
+    ['S', 'M', 'L', 'XL'].forEach(talle => {
+        const option = document.createElement('option');
+        option.value = talle;
+        option.textContent = talle;
+        select.appendChild(option);
+    });
+
+    const addButton = document.createElement('button');
+    addButton.className = 'btn btn-primary';
+    addButton.textContent = 'Comprar';
+    addButton.addEventListener('click', () => agregarAlCarrito(producto));
+
+    cardBody.appendChild(title);
+    cardBody.appendChild(price);
+    cardBody.appendChild(select);
+    cardBody.appendChild(addButton);
+    card.appendChild(img);
+    card.appendChild(cardBody);
+    col.appendChild(card);
+    productContainer.appendChild(col);
+});
+
+actualizarCarrito();
